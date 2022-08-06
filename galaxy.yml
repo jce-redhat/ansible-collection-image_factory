@@ -1,0 +1,21 @@
+### REQUIRED
+namespace: jce_redhat
+name: image_factory
+version: 0.0.1
+readme: README.md
+authors:
+- Chris Edillon <jce@redhat.com>
+
+
+### OPTIONAL but strongly recommended
+description: Ansible collection for building custom RHEL images
+license:
+  - MIT
+tags:
+  - redhat
+  - rhel
+  - image builder
+  - osbuild-composer
+repository: https://github.com/jce-redhat/ansible-collection-image_factory
+issues: https://github.com/jce-redhat/ansible-collection-image_factory/issues
+

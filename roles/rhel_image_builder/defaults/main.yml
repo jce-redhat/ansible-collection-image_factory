@@ -1,0 +1,66 @@
+---
+# install image builder packages and enable osbuild-composer service
+rhel_image_builder_install: true
+rhel_image_builder_packages:
+  - osbuild-composer
+  - composer-cli
+  - bash-completion
+
+# install cockpit-related packages and enable cockpit service
+rhel_image_builder_install_cockpit: false
+rhel_image_builder_cockpit_packages:
+  - cockpit
+  - cockpit-composer
+
+# list of additional packages to include in the image, for example
+#   - name: tmux
+#   - name: aide
+#     version: '*'
+rhel_image_builder_blueprint_packages: []
+
+# image builder customizations
+rhel_image_builder_blueprint_hostname: ''
+rhel_image_builder_blueprint_users: []
+rhel_image_builder_blueprint_groups: []
+rhel_image_builder_blueprint_sshkeys: []
+
+# documentation is confusing on the difference between
+# customizations.kernel.name and customizations.kernel.name.name,
+# and a blueprint push complains if both are set, so only support
+# the former for now
+rhel_image_builder_blueprint_kernel: []
+#  name: ''
+#  append: ''
+
+rhel_image_builder_blueprint_timezone: []
+#  timezone: ''
+#  ntpservers: []
+
+rhel_image_builder_blueprint_locale: []
+#  languages: []
+#  keyboard: ''
+
+rhel_image_builder_blueprint_firewall: []
+#  ports: []
+#  services:
+#    enabled: []
+#    disabled: []
+
+rhel_image_builder_blueprint_services: {}
+#  enabled: []
+#  disabled: []
+
+rhel_image_builder_blueprint_filesystems: []
+
+# debugging prevents artifact cleanup so they can be reviewed as needed
+rhel_image_builder_debug: false
+
+# image formats to build
+# - type is one of `composer-cli compose types`
+# - size is in MiB
+rhel_image_builder_image_formats:
+  - type: qcow2
+    size: 10240
+
+...
+# vim: ft=yaml.ansible

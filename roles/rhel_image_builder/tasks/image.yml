@@ -1,0 +1,64 @@
+---
+- name: Create working temp directory
+  ansible.builtin.tempfile:
+    state: directory
+  register: _tempdir
+
+- name: Set blueprint file path
+  ansible.builtin.set_fact:
+    _blueprint_path: '{{ _tempdir.path }}/{{ rhel_image_builder_blueprint_name }}.toml'
+
+- name: Build images
+  block:
+    - name: Create image blueprint file
+      ansible.builtin.template:
+        src: templates/blueprint-template.toml.j2
+        dest: '{{ _blueprint_path }}'
+
+    - name: Push blueprint
+      ansible.builtin.command:
+        cmd: composer-cli blueprints push {{ _blueprint_path }}
+
+    - name: Run blueprint dependency check
+      ansible.builtin.command:
+        cmd: composer-cli blueprints depsolve {{ rhel_image_builder_blueprint_name }}
+      register: _depsolve_results
+
+    - name: Build images
+      ansible.builtin.command:
+        cmd: composer-cli compose start --size {{ item.size }} {{ rhel_image_builder_blueprint_name }} {{ item.type }}
+      loop: '{{ rhel_image_builder_image_formats }}'
+      register: _compose_results
+
+    - name: Build UUID mapping
+      ansible.builtin.set_fact:
+        _image_uuids: '{{ _image_uuids | default({}) | combine({item.0.type: item.1.stdout.split()[1]}) }}'
+      loop: '{{ rhel_image_builder_image_formats | zip(_compose_results.results) }}'
+
+    - name: Wait for image builds to complete
+      ansible.builtin.command:
+        cmd: composer-cli compose status
+      loop: '{{ _image_uuids.values() }}'
+      register: _compose_info
+      until: _compose_info.stdout | regex_search(item + " FINISHED") is not none or
+             _compose_info.stdout | regex_search(item + " FAILED") is not none
+      retries: 30
+      delay: 30
+      failed_when: _compose_info.stdout | regex_search(item + " FAILED") is not none
+
+  always:
+    - name: Cleanup tasks
+      block:
+        - name: Delete blueprint
+          ansible.builtin.command:
+            cmd: composer-cli blueprints delete {{ rhel_image_builder_blueprint_name }}
+
+        - name: Delete working directory
+          ansible.builtin.file:
+            path: '{{ _tempdir.path }}'
+            state: absent
+
+      when: not rhel_image_builder_debug | bool
+
+...
+# vim: ft=yaml.ansible

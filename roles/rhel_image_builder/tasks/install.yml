@@ -1,0 +1,32 @@
+---
+- name: Ensure image builder and dependencies are installed
+  ansible.builtin.yum:
+    name: '{{ rhel_image_builder_packages }}'
+    state: present
+  register: _package_install
+
+- name: Enable osbuild-composer socket
+  ansible.builtin.systemd:
+    name: osbuild-composer.socket
+    state: started
+    enabled: true
+  when: _package_install is changed
+
+- name: Ensure cockpit-composer and dependencies are installed
+  ansible.builtin.yum:
+    name: '{{ rhel_image_builder_cockpit_packages }}'
+    state: present
+  when: rhel_image_builder_install_cockpit | bool
+  register: _cockpit_install
+
+- name: Enable cockpit socket
+  ansible.builtin.systemd:
+    name: cockpit.socket
+    state: started
+    enabled: true
+  when: _cockpit_install is changed
+
+# TODO: add tasks to create repo JSON files in /etc/osbuild-composer/repositories
+
+...
+# vim: ft=yaml.ansible

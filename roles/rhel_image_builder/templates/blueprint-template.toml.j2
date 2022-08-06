@@ -1,0 +1,124 @@
+name = "{{ rhel_image_builder_blueprint_name }}"
+description = "{{ rhel_image_builder_blueprint_description | default('') }}"
+version = "{{ rhel_image_builder_blueprint_version | default('0.0.1') }}"
+modules = []
+groups = []
+{% for _pkg in rhel_image_builder_blueprint_packages %}
+
+[[packages]]
+name = "{{ _pkg.name }}"
+{% if _pkg.version is defined %}
+version = "{{ _pkg.version }}"
+{% endif %}
+{% endfor %}
+
+[customizations]
+{% if rhel_image_builder_blueprint_hostname %}
+hostname = "{{ rhel_image_builder_blueprint_hostname }}"
+{% endif %}
+{% for _group in rhel_image_builder_blueprint_groups %}
+
+[[customizations.group]]
+name = "{{ _group.name }}"
+{% if _group.gid is defined %}
+gid = {{ _group.gid }}
+{% endif %}
+{% endfor %}
+{% for _user in rhel_image_builder_blueprint_users %}
+
+[[customizations.user]]
+name = "{{ _user.name }}"
+{% for _item in ['description','password','key','home','shell'] %}
+{% if _item in _user %}
+{{ _item }} = "{{ _user[_item] }}"
+{% endif %}
+{% endfor %}
+{% if _user.groups is defined %}
+groups = {{ _user.groups }}
+{% endif %}
+{% for _item in ['uid','gid'] %}
+{% if _item in _user %}
+{{ _item }} = {{ _user[_item] }}
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% for _sshkey in rhel_image_builder_blueprint_sshkeys %}
+
+[[customizations.sshkey]]
+user = "{{ _sshkey.user }}"
+key = "{{ _sshkey.key }}"
+{% endfor %}
+{% if rhel_image_builder_blueprint_kernel %}
+{% if rhel_image_builder_blueprint_kernel.name is defined or
+      rhel_image_builder_blueprint_kernel.append is defined %}
+
+[customizations.kernel]
+{% if rhel_image_builder_blueprint_kernel.name is defined %}
+name = "{{ rhel_image_builder_blueprint_kernel.name }}"
+{% endif %}
+{% if rhel_image_builder_blueprint_kernel.append is defined %}
+append = "{{ rhel_image_builder_blueprint_kernel.append }}"
+{% endif %}
+{% endif %}
+{% endif %}
+{% if rhel_image_builder_blueprint_timezone %}
+
+[customizations.timezone]
+{% if rhel_image_builder_blueprint_timezone.timezone %}
+timezone = "{{ rhel_image_builder_blueprint_timezone.timezone }}"
+{% endif %}
+{% if rhel_image_builder_blueprint_timezone.ntpservers %}
+{# TODO documentation shows a string value here but it must be a list,
+   add assertion in role tasks? #}
+ntpservers = {{ rhel_image_builder_blueprint_timezone.ntpservers }}
+{% endif %}
+{% endif %}
+{% if rhel_image_builder_blueprint_locale %}
+
+[customizations.locale]
+{% if rhel_image_builder_blueprint_locale.languages is defined %}
+languages = {{ rhel_image_builder_blueprint_locale.languages }}
+{% endif %}
+{% if rhel_image_builder_blueprint_locale.keyboard is defined %}
+keyboard = "{{ rhel_image_builder_blueprint_locale.keyboard }}"
+{% endif %}
+{% endif %}
+{% if rhel_image_builder_blueprint_firewall %}
+{% if rhel_image_builder_blueprint_firewall.ports is defined %}
+
+[customizations.firewall]
+ports = {{ rhel_image_builder_blueprint_firewall.ports }}
+{% endif %}
+{% if rhel_image_builder_blueprint_firewall.services is defined %}
+
+[customizations.firewall.services]
+{% if rhel_image_builder_blueprint_firewall.services.enabled is defined %}
+enabled = {{ rhel_image_builder_blueprint_firewall.services.enabled }}
+{% endif %}
+{% if rhel_image_builder_blueprint_firewall.services.disabled is defined %}
+disabled = {{ rhel_image_builder_blueprint_firewall.services.disabled }}
+{% endif %}
+{% endif %}
+{% endif %}
+{% if rhel_image_builder_blueprint_services %}
+
+[customizations.services]
+{% if rhel_image_builder_blueprint_services.enabled is defined %}
+enabled = {{ rhel_image_builder_blueprint_services.enabled }}
+{% endif %}
+{% if rhel_image_builder_blueprint_services.disabled is defined %}
+disabled = {{ rhel_image_builder_blueprint_services.disabled }}
+{% endif %}
+{% endif %}
+{% if rhel_image_builder_blueprint_filesystems %}
+{% for _fs in rhel_image_builder_blueprint_filesystems %}
+
+[[customizations.filesystem]]
+mountpoint = "{{ _fs.mountpoint }}"
+{% if _fs.size is string %}
+size = "{{ _fs.size }}"
+{% else %}
+size = {{ _fs.size }}
+{% endif %}
+{% endfor %}
+{% endif %}

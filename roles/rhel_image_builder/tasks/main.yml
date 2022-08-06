@@ -1,0 +1,10 @@
+---
+- name: Run image builder installation tasks
+  include_tasks: install.yml
+  when: rhel_image_builder_install | bool
+  
+- name: Run image build tasks
+  include_tasks: image.yml
+
+...
+# vim: ft=yaml.ansible
