@@ -6,6 +6,7 @@
   register: _package_install
 
 - name: Enable osbuild-composer socket
+  # noqa: no-handler
   ansible.builtin.systemd:
     name: osbuild-composer.socket
     state: started
@@ -20,6 +21,7 @@
   register: _cockpit_install
 
 - name: Enable cockpit socket
+  # noqa: no-handler
   ansible.builtin.systemd:
     name: cockpit.socket
     state: started

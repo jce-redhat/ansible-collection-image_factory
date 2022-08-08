@@ -14,17 +14,23 @@
       ansible.builtin.template:
         src: templates/blueprint-template.toml.j2
         dest: '{{ _blueprint_path }}'
+        owner: root
+        group: root
+        mode: 0644
 
     - name: Push blueprint
+      # noqa: no-changed-when
       ansible.builtin.command:
         cmd: composer-cli blueprints push {{ _blueprint_path }}
 
     - name: Run blueprint dependency check
+      # noqa: no-changed-when
       ansible.builtin.command:
         cmd: composer-cli blueprints depsolve {{ rhel_image_builder_blueprint_name }}
       register: _depsolve_results
 
     - name: Build images
+      # noqa: no-changed-when
       ansible.builtin.command:
         cmd: composer-cli compose start --size {{ item.size }} {{ rhel_image_builder_blueprint_name }} {{ item.type }}
       loop: '{{ rhel_image_builder_image_formats }}'
@@ -36,6 +42,7 @@
       loop: '{{ rhel_image_builder_image_formats | zip(_compose_results.results) }}'
 
     - name: Wait for image builds to complete
+      # noqa: no-changed-when
       ansible.builtin.command:
         cmd: composer-cli compose status
       loop: '{{ _image_uuids.values() }}'
@@ -50,6 +57,7 @@
     - name: Cleanup tasks
       block:
         - name: Delete blueprint
+          # noqa: no-changed-when
           ansible.builtin.command:
             cmd: composer-cli blueprints delete {{ rhel_image_builder_blueprint_name }}
 
