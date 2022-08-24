@@ -62,5 +62,27 @@ rhel_image_builder_image_formats:
   - type: qcow2
     size: 10240
 
+# override osbuilder built-in system repos
+# each item in the list must consist of a filename that matches
+# one found in /usr/share/osbuild-composer/repositories (the
+# built-in repos), and content in YAML format that translates
+# into the relevant JSON used in the file.  for example:
+# rhel_image_builder_system_repos:
+#   - filename: rhel-86.json
+#     content:
+#       x86_64:
+#         - name: baseos
+#           baseurl: http://proxy.lab.home/repos/rhel-8-for-x86_64-baseos-rpms/
+#           gpgkey: '{{ lookup("file", "/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release") }}'
+#           rhsm: false
+#           check_gpg: true
+#         - name: appstream
+#           baseurl: http://proxy.lab.home/repos/rhel-8-for-x86_64-appstream-rpms/
+#           gpgkey: '{{ lookup("file", "/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release") }}'
+#           rhsm: false
+#           check_gpg: true
+rhel_image_builder_system_repos: []
+
+
 ...
 # vim: ft=yaml.ansible

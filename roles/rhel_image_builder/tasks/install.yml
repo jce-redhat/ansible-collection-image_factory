@@ -29,6 +29,25 @@
   when: _cockpit_install is changed
 
 # TODO: add tasks to create repo JSON files in /etc/osbuild-composer/repositories
+- name: Create system repo overrides directory
+  ansible.builtin.file:
+    path: /etc/osbuild-composer/repositories
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Create system repo overrides
+  ansible.builtin.copy:
+    content: '{{ item.content | to_nice_json }}'
+    dest: /etc/osbuild-composer/repositories/{{ item.filename }}
+    owner: root
+    group: root
+    mode: 0644
+  loop: '{{ rhel_image_builder_system_repos }}'
+  when: rhel_image_builder_system_repos
+  notify: Restart osbuild-composer.service
+
 
 ...
 # vim: ft=yaml.ansible
