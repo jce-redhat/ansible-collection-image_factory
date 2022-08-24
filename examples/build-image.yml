@@ -1,0 +1,33 @@
+---
+- name: Build multiple images from one blueprint
+  hosts: compose-server
+  become: true
+
+  vars:
+    rhel_image_builder_blueprint_name: test-blueprint
+    rhel_image_builder_blueprint_packages:
+      - name: vim-enhanced
+    rhel_image_builder_blueprint_users:
+      - name: localadmin
+        description: 'local admin user'
+        uid: 4999
+        groups:
+          - users
+          - wheel
+    rhel_image_builder_blueprint_sshkeys:
+      - user: cloud-user
+        key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5xxxxxxxxxxxxxxxxxxOjQFbuAQ6jRZMS49HlfdnSI5y42fbh"
+    rhel_image_builder_image_formats:
+      - type: qcow2
+        size: 10240
+      - type: ami
+        size: 10240
+
+  tasks:
+    - name: Run redhat_image_builder role
+      include_role:
+        name: jce_redhat.image_factory.rhel_image_builder
+      tags: always
+
+...
+# vim: ft=yaml.ansible
